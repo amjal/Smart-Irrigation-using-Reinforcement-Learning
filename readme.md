@@ -2,8 +2,10 @@
 
 
 ## Problem definition:
-	The aim is to train a reinforcement learning agent to be able to estimate the proper amount of irrigation needed at 
-	each time unit in order to keep the moisture of a particular soil layer (the plant root zone let's say) in a certain bound. The agent should use the obtained information from the moisture of different soil layers.
+	The aim is to train a reinforcement learning agent to be able to estimate the proper amount of
+	irrigation needed at each time unit in order to keep the moisture of a particular soil layer 
+	(the plant root zone let's say) in a certain bound. The agent should use the obtained information 
+	from the moisture of different soil layers.
 
 ### Prerequisites
 
