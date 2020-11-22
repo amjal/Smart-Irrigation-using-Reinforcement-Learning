@@ -1,10 +1,9 @@
-# Project Title
+# Smart Irrigation using Reinforcement Learning
 
-One Paragraph of project description goes here
 
-## Getting Started
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+## Problem definition:
+	The aim is to train a reinforcement learning agent to be able to estimate the proper amount of irrigation needed at 
+	each time unit in order to keep the moisture of a particular soil layer (the plant root zone let's say) in a certain bound. The agent should use the obtained information from the moisture of different soil layers.
 
 ### Prerequisites
 
