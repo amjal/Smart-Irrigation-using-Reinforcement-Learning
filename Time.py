@@ -27,5 +27,3 @@ class ArtificialTime:
                 self.season = self.seasons[self.month]
 
 
-t1 = ArtificialTime()
-t2 = ArtificialTime()

@@ -89,5 +89,4 @@ def with_agent():
         t.increase_time()
     soil.visualizer('day')
 
-
-with_agent()
+interaction()
