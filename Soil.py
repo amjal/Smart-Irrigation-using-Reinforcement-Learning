@@ -7,10 +7,11 @@ from matplotlib import pyplot as plt
 
 class Soil:
     all_data = []
+    # This variable is useful for visualization but can be omitted later
     irrigation_iteration = 0
     LAYERS_SIZE = np.array([])
     INITIAL_LAYERS_SIZE = np.array([])
-    NUMBER_OF_LAYERS = 3
+    NUMBER_OF_LAYERS = 4
 
     LAYERS_PENETRATION_MEAN = np.array([])
     LAYERS_PENETRATION_VAR = np.array([])
@@ -36,8 +37,7 @@ class Soil:
     def __init__(self, time):
         self.time = time
 
-        # penetrations are between 1 to 7 percent with 0.5 percent variance
-        self.LAYERS_PENETRATION_MEAN = np.random.rand(self.NUMBER_OF_LAYERS)*(6/100) + 1/100
+        self.LAYERS_PENETRATION_MEAN = np.random.rand(self.NUMBER_OF_LAYERS)*(4/100) + 5/100
         self.LAYERS_PENETRATION_VAR = np.random.rand(self.NUMBER_OF_LAYERS)/200
 
         self.LAYERS_MOISTURE = np.random.rand(self.NUMBER_OF_LAYERS)
@@ -159,5 +159,10 @@ class Soil:
         self.handle_penetration(1)
         self.handle_water_loss()
         self.irrigation_iteration += 1
+        print("\t\t penetrations: "+ str(self.LAYERS_PENETRATION))
+        print("\t\t water loss: " + str(self.LAYERS_WATER_LOSS))
+
+    def get_layer_moisture(self, layer):
+        return self.LAYERS_MOISTURE[layer]
 
 

@@ -27,7 +27,7 @@ class Action:
 
 class State:
     def __init__(self, moisture, season, time_of_day):
-        self.moisture = numpy.round(moisture, 2)
+        self.moisture = numpy.round(moisture, 1)
         self.season = season
         self.time_of_day = int(time_of_day/60)
 
@@ -53,6 +53,7 @@ class Policy:
     def __init__(self, gamma, alpha, intensities, **kwargs):
         self.gamma = gamma
         self.alpha = alpha
+        # Intensities is an array denoting the levels of output irrigation of the valve. 
         self.intensities = intensities
         self.epsilon = kwargs.get('epsilon', 1)
         # Optimism value says what value to assume for our next state when it's an unknown state with empty actions
@@ -80,6 +81,7 @@ class Policy:
                 actions[Action(i)] = self.optimism_value
             self.state_action_values[state] = actions
 
+    # This method picks an action from the available set of actions for the input state
     def mapper(self, state):
         actions = self.state_action_values[state]
         # with probability 1-epsilon, we will act greedily and exploit
@@ -150,6 +152,7 @@ class Policy:
 
 class Agent:
 
+    '''
     def __init__(self, t, policy, min_moisture, max_moisture, measures, url):
         self.time = t
         self.policy = policy
@@ -163,22 +166,56 @@ class Agent:
         self.measures = measures
         self.reward = 0
         self.url = url
+    '''
+
+    def __init__(self, soil, t, policy, min_moisture, max_moisture, target_layer):
+        self.time = t;
+        self.soil = soil;
+        self.policy = policy
+        self.min_moisture = min_moisture
+        self.max_moisture = max_moisture
+        self.learning_iteration = 0
+        self.target_layer = target_layer
+        self.state = State(soil.get_layer_moisture(target_layer), self.time.season, self.time.time_of_day)
+        self.policy.check_add_state(self.state)
+        # These two are made properties of the Agent class for debugging reasons
+        self.action_to_take = numpy.nan
+        self.reward = 0
+
 
     def Q_learning_iteration(self):
         # Choose action
         self.action_to_take, explore_exploit = self.policy.mapper(self.state)
+
+        # Take action
+        print("state: " + str(self.soil.get_layer_moisture(self.target_layer)))
+        print("action: " + str(self.action_to_take))
+        self.soil.VALVE_CAPACITY = self.action_to_take.intensity
+        self.soil.IS_WATERING = self.action_to_take.intensity > 0.00
+        self.soil.irrigate()
+        for (s, a_v) in self.policy.state_action_values.items():
+            print(str(s) + ":")
+            for (a,v) in self.policy.state_action_values[s].items():
+                print("\t" + str(a) + ": " + str(v))
+        '''
         # Take action
         requests.get(self.url, params={'action_to_take': self.action_to_take.intensity,
                                        'is_watering': self.action_to_take.intensity > 0})
         # Wait for irrigation action to complete
         time.sleep(24*3600/self.time.day_time_limit)
-        # Observe the impact of what we did on the world
+        '''
+        '''
         response = requests.get(self.url, params={'q': 'measures'})
         self.measures = []
         if response.status_code == 200:
             for m in response.json()['measures']:
                 self.measures.append(m)
+        '''
+        # Observe the impact of what we did on the world
         reward, next_state = self.observer(self.action_to_take)
+        print("reward: " + str(reward))
+        print("----------------------------------------------")
+        #input()
         # Update Q-function
         self.policy.value_updater(explore_exploit, reward, reward - self.reward,
                                   self.state, next_state, self.action_to_take)
@@ -188,17 +225,16 @@ class Agent:
         self.learning_iteration += 1
 
     def observer(self, action_taken):
-        mean_moisture = numpy.mean(self.measures)
-        next_state = State(mean_moisture, self.time.season, self.time.time_of_day)
+        result_moisture = self.soil.get_layer_moisture(self.target_layer)
+        next_state = State(result_moisture, self.time.season, self.time.time_of_day)
         self.policy.check_add_state(next_state)
-        if mean_moisture < self.min_moisture:
-            reward = 1 - self.min_moisture + mean_moisture
-            self.policy.heuristic = mean_moisture - self.min_moisture
-        elif mean_moisture > self.max_moisture:
-            reward = 1 - mean_moisture + self.max_moisture
-            self.policy.heuristic = mean_moisture - self.max_moisture
+        if result_moisture < self.min_moisture:
+            reward = 1 - self.min_moisture + result_moisture
+            self.policy.heuristic = result_moisture - self.min_moisture
+        elif result_moisture > self.max_moisture:
+            reward = 1 - result_moisture + self.max_moisture
+            self.policy.heuristic = result_moisture - self.max_moisture
         else:
             reward = 2 - action_taken.intensity/max(self.policy.intensities)
             self.policy.heuristic = 0
         return reward, next_state
-

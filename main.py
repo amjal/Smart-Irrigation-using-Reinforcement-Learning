@@ -75,8 +75,8 @@ def interaction():
 def with_agent():
     t = ArtificialTime()
     soil = Soil(t)
-    policy = ElementaryRLAgent.Policy(0.1, 0.01, [0, 10, 20])
-    agent = ElementaryRLAgent.Agent(soil, t, policy, 0.7, 0.8, [0, 1, 2])
+    policy = ElementaryRLAgent.Policy(0.1, 0.01, [0, 20, 30])
+    agent = ElementaryRLAgent.Agent(soil, t, policy, 0.7, 0.8, 3)
     while t.month < 2:
         agent.Q_learning_iteration()
         '''
@@ -89,4 +89,4 @@ def with_agent():
         t.increase_time()
     soil.visualizer('day')
 
-interaction()
+with_agent()
